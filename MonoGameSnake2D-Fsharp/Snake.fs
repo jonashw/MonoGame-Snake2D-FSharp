@@ -5,7 +5,8 @@ open Microsoft.Xna.Framework.Graphics
 open PalleteColor
 
 type Snake = 
-    { Head: Vector2
+    private {
+      Head: Vector2
     ; Body: Vector2 list
     ; Tail: Vector2
     ; Heading: Heading
@@ -14,6 +15,18 @@ type Snake =
 and Heading = Axis * AxisDirection
 and Axis = X | Y
 and AxisDirection = Positive | Negative
+
+let isTileDigital snake = 
+    ((int snake.Head.X) % Tile.size) = 0 &&
+    ((int snake.Head.Y) % Tile.size) = 0
+
+let makeSnake h t H =
+    { Head = h
+    ; Tail = t
+    ; Body = []
+    ; Heading = H
+    ; GrowthLengthLeft = 0
+    }
 
 let private headingUnitVector =
     function

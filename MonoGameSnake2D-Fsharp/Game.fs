@@ -13,12 +13,10 @@ type Game1 () as x =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let mutable snakeTexture: Texture2D = null
     let mutable snake = 
-        { Head = Vector2(100.0f, 100.0f)
-        ; Tail = Vector2(0.0f, 100.0f)
-        ; Body = []
-        ; Heading = X, Positive
-        ; GrowthLengthLeft = 0
-        }
+        makeSnake
+            (Vector2(100.0f, 100.0f))
+            (Vector2(0.0f, 100.0f))
+            (X, Positive)
     let mutable nextHeading = None
     let mutable vp: Viewport = Unchecked.defaultof<Viewport>
     let backgroundColor = Blank, Lowest
@@ -51,27 +49,8 @@ type Game1 () as x =
             else None
         let nextGridOkHeading =
             nextHeading
-            |> Option.filter (fun _ -> ((int snake.Head.X) % Tile.size) = 0 && ((int snake.Head.Y) % Tile.size) = 0)
+            |> Option.filter (fun _ -> Snake.isTileDigital snake)
         do snake <- Snake.update snake nextGridOkHeading newPowerUp None (gameTime.ElapsedGameTime) 
-        //printfn "%A" <| snake.Head :: snake.Body @ [snake.Tail]
-        printfn "%A %A" (snake.Head) (vp.X + vp.Width, vp.Y + vp.Height)
-        let nextTransportLocation =
-            let w = (vp.X + vp.Width)  |> float32
-            let h = (vp.Y + vp.Height) |> float32
-            if   snake.Head.X > w
-            then Some <| Vector2(0.0f, snake.Head.Y)
-            elif snake.Head.X < 0.0f 
-            then Some <| Vector2(w, snake.Head.Y)
-            elif snake.Head.Y > h
-            then Some <| Vector2(snake.Head.X, 0.0f)
-            elif snake.Head.Y < 0.0f
-            then Some <| Vector2(snake.Head.X, h)
-            else None
-        match nextTransportLocation with
-        | None -> ()
-        | Some l -> printfn "next transport location = %A" l
-        ()
-
  
     override x.Draw (gameTime) =
         do x.GraphicsDevice.Clear <| toColor backgroundColor
