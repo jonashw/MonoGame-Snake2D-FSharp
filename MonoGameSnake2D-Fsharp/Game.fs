@@ -38,10 +38,10 @@ type Game1 () as x =
         let kb = Keyboard.GetState()
         if(kb.IsKeyDown(Keys.Escape)) then x.Exit()
         let newHeading =
-            if   kb.IsKeyDown(Keys.Up)    then Some(Y,Negative)
-            elif kb.IsKeyDown(Keys.Down)  then Some(Y,Positive)
-            elif kb.IsKeyDown(Keys.Left)  then Some(X,Negative)
-            elif kb.IsKeyDown(Keys.Right) then Some(X,Positive)
+            if   kb.IsKeyDown(Keys.Up)    || kb.IsKeyDown(Keys.K) then Some(Y,Negative)
+            elif kb.IsKeyDown(Keys.Down)  || kb.IsKeyDown(Keys.J) then Some(Y,Positive)
+            elif kb.IsKeyDown(Keys.Left)  || kb.IsKeyDown(Keys.H) then Some(X,Negative)
+            elif kb.IsKeyDown(Keys.Right) || kb.IsKeyDown(Keys.L) then Some(X,Positive)
             else None
         if newHeading |> Option.isSome then nextHeading <- newHeading
         let newPowerUp =
