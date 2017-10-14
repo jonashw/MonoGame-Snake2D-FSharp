@@ -2,8 +2,9 @@
 open Microsoft.Xna.Framework
 open System
 open Microsoft.Xna.Framework.Graphics
+open PalleteColor
 
-type Snake =
+type Snake = 
     { Head: Vector2
     ; Body: Vector2 list
     ; Tail: Vector2
@@ -87,10 +88,12 @@ let update
         ; GrowthLengthLeft = gll_
         }
 
+let normalColor = Primary, Low
+let growingColor = SecondaryB, High
 let draw (sb: SpriteBatch) (t: Texture2D) (snake: Snake): unit =
     let vertices = snake.Head :: snake.Body @ [snake.Tail] 
     let segments = List.pairwise vertices
-    let color = Color.Lerp(Color.White, Color.Yellow, (float32 snake.GrowthLengthLeft) / 40.0f)
+    let color = Color.Lerp(toColor normalColor, toColor growingColor, (float32 snake.GrowthLengthLeft) / 40.0f)
     for (a,b) in segments do
         let w = int <| Math.Abs(a.X - b.X)
         let h = int <| Math.Abs(a.Y - b.Y)

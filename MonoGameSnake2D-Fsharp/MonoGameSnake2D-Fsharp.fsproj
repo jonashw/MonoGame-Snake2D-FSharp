@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Tile.fs" />
+    <Compile Include="PalleteColor.fs" />
     <Compile Include="Snake.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />

@@ -3,6 +3,7 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
 open Snake
+open PalleteColor
  
 type Game1 () as x =
     inherit Game()
@@ -20,6 +21,7 @@ type Game1 () as x =
         }
     let mutable nextHeading = None
     let mutable vp: Viewport = Unchecked.defaultof<Viewport>
+    let backgroundColor = Blank, Lowest
  
     override x.Initialize() =
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
@@ -69,9 +71,10 @@ type Game1 () as x =
         | None -> ()
         | Some l -> printfn "next transport location = %A" l
         ()
+
  
     override x.Draw (gameTime) =
-        do x.GraphicsDevice.Clear Color.CornflowerBlue
+        do x.GraphicsDevice.Clear <| toColor backgroundColor
         spriteBatch.Begin()
         do Snake.draw spriteBatch snakeTexture snake
         spriteBatch.End()
