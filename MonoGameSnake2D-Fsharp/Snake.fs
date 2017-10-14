@@ -3,6 +3,8 @@ open Microsoft.Xna.Framework
 open System
 open Microsoft.Xna.Framework.Graphics
 open PalleteColor
+open Movement
+open PowerUp
 
 type Snake = 
     private {
@@ -12,9 +14,6 @@ type Snake =
     ; Heading: Heading
     ; GrowthLengthLeft: int
     }
-and Heading = Axis * AxisDirection
-and Axis = X | Y
-and AxisDirection = Positive | Negative
 
 let isTileDigital snake = 
     ((int snake.Head.X) % Tile.size) = 0 &&
@@ -28,25 +27,7 @@ let makeSnake h t H =
     ; GrowthLengthLeft = 0
     }
 
-let private headingUnitVector =
-    function
-    | (X, Positive) ->  Vector2.UnitX
-    | (X, Negative) -> -Vector2.UnitX
-    | (Y, Positive) ->  Vector2.UnitY
-    | (Y, Negative) -> -Vector2.UnitY
-
-let private withoutLastItem xs =
-    xs
-    |> List.rev 
-    |> List.tail 
-    |> List.rev
-
-type PowerUp = 
-    | Regular
-    | Big
-    | Jumbo
-
-let powerUpGrowthLength = function
+let private powerUpGrowthLength = function
 | Regular -> 5
 | Big -> 10
 | Jumbo -> 20
@@ -86,7 +67,7 @@ let update
         let t, b, gll_ = 
             if snake.Tail = tailPrior 
             then 
-                tailPrior, snake.Body |> withoutLastItem, gll
+                tailPrior, snake.Body |> ListOperations.dropLast, gll
             elif snake.GrowthLengthLeft > 0
             then
                 snake.Tail, snake.Body, gll - 1

@@ -2,8 +2,8 @@
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
-open Snake
 open PalleteColor
+open Movement
  
 type Game1 () as x =
     inherit Game()
@@ -13,7 +13,7 @@ type Game1 () as x =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let mutable snakeTexture: Texture2D = null
     let mutable snake = 
-        makeSnake
+        Snake.makeSnake
             (Vector2(100.0f, 100.0f))
             (Vector2(0.0f, 100.0f))
             (X, Positive)
