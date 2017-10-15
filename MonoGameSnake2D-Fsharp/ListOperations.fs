@@ -5,4 +5,3 @@ let dropLast xs =
     |> List.rev 
     |> List.tail 
     |> List.rev
-

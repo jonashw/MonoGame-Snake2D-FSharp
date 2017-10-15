@@ -6,7 +6,7 @@ type Heading = Axis * AxisDirection
 and Axis = X | Y
 and AxisDirection = Positive | Negative
 
-let headingUnitVector =
+let headingToUnitVector =
     function
     | (X, Positive) ->  Vector2.UnitX
     | (X, Negative) -> -Vector2.UnitX

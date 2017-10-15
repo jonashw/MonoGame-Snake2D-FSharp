@@ -17,6 +17,8 @@ type Game1 () as x =
             (Vector2(100.0f, 100.0f))
             (Vector2(0.0f, 100.0f))
             (X, Positive)
+    let mutable snakeAlt = 
+        Snake.makeBrokenSnake ()
     let mutable nextHeading = None
     let mutable vp: Viewport = Unchecked.defaultof<Viewport>
     let backgroundColor = Blank, Lowest
