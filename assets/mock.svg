@@ -11,8 +11,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="347.095mm"
-   height="1699.944mm"
-   viewBox="0 0 347.095 1699.9439"
+   height="2103.771mm"
+   viewBox="0 0 347.095 2103.7709"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
@@ -29,9 +29,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.22627417"
-     inkscape:cx="2743.5099"
-     inkscape:cy="6245.9722"
+     inkscape:zoom="0.08"
+     inkscape:cx="-794.63595"
+     inkscape:cy="4735.926"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -55,17 +55,17 @@
      fit-margin-bottom="0"
      inkscape:snap-page="true">
     <sodipodi:guide
-       position="119.94054,631.58444"
+       position="119.94054,1051.2863"
        orientation="1,0"
        id="guide8806"
        inkscape:locked="false" />
     <sodipodi:guide
-       position="494.63719,286.0905"
+       position="494.63719,705.7924"
        orientation="0,1"
        id="guide8999"
        inkscape:locked="false" />
     <sodipodi:guide
-       position="13.056207,736.98939"
+       position="13.056207,1156.6913"
        orientation="1,0"
        id="guide9135"
        inkscape:locked="false" />
@@ -87,28 +87,12 @@
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline"
-     transform="translate(69.660458,114.21066)">
+     transform="translate(69.660458,98.335668)">
     <image
        y="64.740723"
        x="-272.74741"
        id="image4604"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWEAAADUCAIAAADC7QXyAAAAA3NCSVQICAjb4U/gAAADQElEQVR4
-nO3WMW5TQRhG0dhyHJBSUKVEIKVhA5Tsg7QsAFbAHqBBgg3QZkcpoSESBVgUedQvsq/lxuPinHKm
-+aqrfzFN0xnADsvRA4CTphFA0QigaARQNAIoGgEUjQCKRgBltevj3bePx9yx1/2ry9ETZjYvTmsP
-ez1cPR09YeZifTF6wszt2c3Wd3cEUDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBF
-I4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQ
-NAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoKx2fbx/c3nMHXs9v74b
-PWFu8XP0Ag60/DN6wczibD16wiM3W1/dEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQC
-KBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUj
-gKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4Cy2vXx9dOzY+7Y
-69/m7egJM9PDy9ETOMxycTV6wszFk/XoCTOfv2x/d0cARSOAohFA0QigaARQNAIoGgEUjQCKRgBF
-I4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQ
-NAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AymrX
-x4fXv4+5Y6/r+++jJ8z9+jF6AQfa/B29YO78fPSCR263vrojgKIRQNEIoGgEUDQCKBoBFI0AikYA
-RSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgE
-UDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpG
-AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg==
-"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWEAAADUCAIAAADC7QXyAAAAA3NCSVQICAjb4U/gAAADQElEQVR4 nO3WMW5TQRhG0dhyHJBSUKVEIKVhA5Tsg7QsAFbAHqBBgg3QZkcpoSESBVgUedQvsq/lxuPinHKm +aqrfzFN0xnADsvRA4CTphFA0QigaARQNAIoGgEUjQCKRgBltevj3bePx9yx1/2ry9ETZjYvTmsP ez1cPR09YeZifTF6wszt2c3Wd3cEUDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBF I4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQ NAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoKx2fbx/c3nMHXs9v74b PWFu8XP0Ag60/DN6wczibD16wiM3W1/dEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQC KBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUj gKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4Cy2vXx9dOzY+7Y 69/m7egJM9PDy9ETOMxycTV6wszFk/XoCTOfv2x/d0cARSOAohFA0QigaARQNAIoGgEUjQCKRgBF I4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AikYARSOAohFA0QigaARQ NAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgEUDQCKBoBFI0AymrX x4fXv4+5Y6/r+++jJ8z9+jF6AQfa/B29YO78fPSCR263vrojgKIRQNEIoGgEUDQCKBoBFI0AikYA RSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpGAEUjgKIRQNEIoGgE UDQCKBoBFI0AikYARSOAohFA0QigaARQNAIoGgEUjQCKRgBFI4CiEUDRCKBoBFA0AigaARSNAIpG AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg== "
        style="image-rendering:optimizeSpeed"
        preserveAspectRatio="none"
        height="56.091667"
@@ -131,7 +115,7 @@ AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg==
          id="tspan4634">As the snake's head grows closer to a powerup,</tspan><tspan
          sodipodi:role="line"
          x="-56.604252"
-         y="-29.79722"
+         y="-29.797222"
          style="stroke-width:0.26458332"
          id="tspan4636">it's rate of spin increases.</tspan></text>
     <g
@@ -393,7 +377,7 @@ AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg==
          id="tspan8699">If the snake makes contact with a gray block, it dies.</tspan><tspan
          sodipodi:role="line"
          x="-56.738609"
-         y="-63.836487"
+         y="-63.836483"
          style="stroke-width:0.26458332"
          id="tspan8701" /></text>
     <text
@@ -642,7 +626,7 @@ AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg==
            height="494.97476"
            x="1672.7495"
            y="777.80511" /></flowRegion><flowPara
-         id="flowPara8877"></flowPara></flowRoot>    <text
+         id="flowPara8877" /></flowRoot>    <text
        id="text8951"
        y="1208.4624"
        x="-56.604252"
@@ -967,6 +951,61 @@ AGUxTdPoDcDpckcARSOAohFA0QigaARQNAIo/wEUGiCVdquM0gAAAABJRU5ErkJggg==
            x="-122.60602"
            y="1020.1949" />
       </g>
+    </g>
+    <g
+       transform="translate(-550.82155,1443.5772)"
+       style="display:inline"
+       id="g4926">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4887"
+         d="m 662.80228,424.80913 v 80.59996 h -60.58893 v 51.69514 h 96.71996 v -87.2703"
+         style="fill:none;stroke:#49e395;stroke-width:9.5075655;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <g
+         transform="matrix(0.47537826,0,0,0.47537826,340.72168,190.93978)"
+         id="g4914">
+        <path
+           style="fill:none;stroke:#49e395;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 675.18629,13.454835 V 183.00394"
+           id="path4901"
+           inkscape:connector-curvature="0" />
+        <path
+           style="fill:none;stroke:#49e395;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 675.18629,209.46229 H 547.73214"
+           id="path4899"
+           inkscape:connector-curvature="0" />
+        <path
+           style="fill:none;stroke:#49e395;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 521.27379,209.46229 V 318.20754"
+           id="path4897"
+           inkscape:connector-curvature="0" />
+        <path
+           style="fill:none;stroke:#49e395;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 547.73214,318.20754 H 751.19108"
+           id="path4895"
+           inkscape:connector-curvature="0" />
+        <path
+           style="fill:none;stroke:#49e395;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 777.64943,318.20754 V 134.62682"
+           id="path4889"
+           inkscape:connector-curvature="0" />
+      </g>
+      <text
+         id="text4905"
+         y="382.68649"
+         x="506.97427"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332"
+           y="382.68649"
+           x="506.97427"
+           id="tspan4903"
+           sodipodi:role="line">By drawing body segments with rounded ends,</tspan><tspan
+           id="tspan4907"
+           style="stroke-width:0.26458332"
+           y="395.91565"
+           x="506.97427"
+           sodipodi:role="line">we get nice rounded body curves and rounded head/tail.</tspan></text>
     </g>
   </g>
 </svg>
