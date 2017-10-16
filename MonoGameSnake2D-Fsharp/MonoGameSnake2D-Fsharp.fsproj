@@ -55,6 +55,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="PixelPerfectRenderer.fs" />
     <Compile Include="OptionBuilder.fs" />
     <Compile Include="ListOperations.fs" />
     <Compile Include="Movement.fs" />
