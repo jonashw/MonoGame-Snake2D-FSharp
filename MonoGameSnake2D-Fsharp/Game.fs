@@ -11,14 +11,29 @@ type Game1 () as x =
     do x.Content.RootDirectory <- "Content"
     let graphics = new GraphicsDeviceManager(x)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
-    let mutable snakeTexture: Texture2D = null
+    let mutable pixelTexture: Texture2D = null
     let mutable snake = 
         Snake.makeSnake
-            (Vector2(100.0f, 100.0f))
-            (Vector2(0.0f, 100.0f))
+            (60,5)
+            (25,5)
             (X, Positive)
-    let mutable snakeAlt = 
-        Snake.makeBrokenSnake ()
+    let wormholes = 
+        [ Wormhole.makeWormhole 
+            (Complement,Normal) 
+            (10,5) 
+            (70,40)
+            (Rotate Clockwise)
+        ; Wormhole.makeWormhole 
+            (SecondaryB,Normal) 
+            (10,40) 
+            (70,5)
+            (Noop)
+        ; Wormhole.makeWormhole
+            (SecondaryA,Lowest)
+            (70,25)
+            (70,45)
+            (Reflect)
+        ]
     let mutable nextHeading = None
     let mutable vp: Viewport = Unchecked.defaultof<Viewport>
     let backgroundColor = Blank, Lowest
@@ -30,8 +45,8 @@ type Game1 () as x =
         ()
  
     override x.LoadContent() =
-        do snakeTexture <- new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color)
-        snakeTexture.SetData([| Color.White |])
+        do pixelTexture <- new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color)
+        pixelTexture.SetData([| Color.White |])
         ()
  
     override x.Update (gameTime) =
@@ -52,11 +67,15 @@ type Game1 () as x =
         let nextGridOkHeading =
             nextHeading
             |> Option.filter (fun _ -> Snake.isTileDigital snake)
-        do snake <- Snake.update snake nextGridOkHeading newPowerUp None (gameTime.ElapsedGameTime) 
+        let teleport = wormholes |> List.tryPick (Wormhole.tryTeleport <| Snake.headPosition snake)
+        printfn "teleport: %A" teleport
+        do snake <- Snake.update snake nextGridOkHeading newPowerUp teleport (gameTime.ElapsedGameTime) 
  
     override x.Draw (gameTime) =
         do x.GraphicsDevice.Clear <| toColor backgroundColor
         spriteBatch.Begin()
-        do Snake.draw spriteBatch snakeTexture snake
+        do Snake.draw spriteBatch pixelTexture snake
+        for wh in wormholes do
+            Wormhole.draw spriteBatch pixelTexture wh
         spriteBatch.End()
         ()

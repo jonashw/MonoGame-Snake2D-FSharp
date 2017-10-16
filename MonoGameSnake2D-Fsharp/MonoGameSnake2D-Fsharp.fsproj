@@ -55,11 +55,13 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="OptionBuilder.fs" />
     <Compile Include="ListOperations.fs" />
     <Compile Include="Movement.fs" />
     <Compile Include="Tile.fs" />
     <Compile Include="PalleteColor.fs" />
     <Compile Include="PowerUp.fs" />
+    <Compile Include="Wormhole.fs" />
     <Compile Include="Snake.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />

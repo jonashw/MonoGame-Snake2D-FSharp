@@ -19,17 +19,14 @@ let isTileDigital snake =
         ((int head.X) % Tile.size) = 0 &&
         ((int head.Y) % Tile.size) = 0
 
-let makeSnake h t H =
-    { Segments = [h,t]
-    ; Heading = H
-    ; GrowthLengthLeft = 0
-    }
+let headPosition s =
+    match s.Segments with
+    | [] -> Vector2(-100.0f, -100.0f)
+    | (head,_) :: _ -> head
 
-let makeBrokenSnake () =
-    { Segments = [ new Vector2(500.0f, 50.0f), new Vector2(450.0f, 50.0f)
-                 ; new Vector2(100.0f, 200.0f), new Vector2(100.0f, 400.0f)
-                 ; new Vector2(450.0f, 300.0f), new Vector2(450.0f, 500.0f)]
-    ; Heading = (X, Positive)
+let makeSnake h t H =
+    { Segments = [h |> Tile.toVector2,t |> Tile.toVector2]
+    ; Heading = H
     ; GrowthLengthLeft = 0
     }
 
@@ -42,7 +39,7 @@ let update
     (snake: Snake) 
     (newHeading: Heading option) 
     (newPowerUp: PowerUp option)
-    (headTransport: Vector2 option)
+    (headTeleport: Teleport option)
     (gameTimeElapse: TimeSpan): Snake =
     let headingUnitVector = headingToUnitVector snake.Heading 
     let validNewHeading = 
@@ -57,12 +54,14 @@ let update
             else None)
     let newGrowth = newPowerUp |> Option.map powerUpGrowthLength |> Option.defaultValue 0
     let growthLengthLeft = snake.GrowthLengthLeft + newGrowth
-    match snake.Segments, validNewHeading with
-    | [], _ -> 
+    match snake.Segments, validNewHeading, headTeleport with
+    | [], _, _ -> 
+        printfn "invalid snake"
         (* This is an "invalid" snake!
         ** The safest thing to do is to recognize its possibility and pass the buck. *)
         snake
-    | (head,_) :: _ as segments, Some h -> 
+    | (head,_) :: _ as segments, Some h, _ -> 
+        printfn "new heading!"
         (* The head departs from its former location with a new heading.
         ** The old segment crystallizes, and we start a new segment.
         ** Initially, the 2 vertices of the segment have the same position.
@@ -71,7 +70,8 @@ let update
         ; Heading = h
         ; GrowthLengthLeft = snake.GrowthLengthLeft
         }
-    | [(head,tail)], None ->
+    | [(head,tail)], None, None ->
+        printfn "simplest movement!"
         (* The snake is composed of a single segment (a straight line).
         ** Advance the head and tail with the same heading, when appropriate. *)
         let newHead = head + headingUnitVector
@@ -83,7 +83,21 @@ let update
         ; Heading = snake.Heading
         ; GrowthLengthLeft = newGrowthLengthLeft
         }
-    | (head, headMate) :: laterSegments, None ->
+    | (head, headMate) :: laterSegments, None, Some teleport ->
+        printfn "teleport!"
+        (* The head is about to teleport!
+        ** For simplicity, let's ignore Growth/Shrinkage. 
+        ** The heading could change during teleport in the future, but no change is possible for now. *)
+        let nextHeading = snake.Heading |> transformHeading (teleport.HeadingTransform)
+        // To prevent an infinite loop, we have to make sure the snake exits the wormhole completely.
+        let teleportOffset = Vector2.Multiply(headingToUnitVector nextHeading, float32 Tile.size)
+        let nextHead = teleport.To + teleportOffset
+        { Segments = (nextHead, nextHead) :: (head, headMate) :: laterSegments
+        ; Heading = nextHeading
+        ; GrowthLengthLeft = growthLengthLeft
+        }
+    | (head, headMate) :: laterSegments, None, None ->
+        printfn "movement!"
         (* The head continues on its current heading.
         ** The tail may advance, shortening the last segment.
         ** Finally, the last segment may shrink to zero-length and be elimited. *)
