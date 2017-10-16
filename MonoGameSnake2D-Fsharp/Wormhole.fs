@@ -11,7 +11,11 @@ type Wormhole =
             ; HeadingTransform: HeadingTransform
             } 
 
-let makeWormhole c ea eb ht = { Color = c; EntranceA = ea; EntranceB = eb; HeadingTransform = ht }
+let makeWormhole c ea eb ht: Wormhole = 
+    { Color = c
+    ; EntranceA = ea
+    ; EntranceB = eb
+    ; HeadingTransform = ht }
 
 let tryTeleport (projectile: Vector2) (wh: Wormhole): Teleport option =
     option {
@@ -26,8 +30,8 @@ let tryTeleport (projectile: Vector2) (wh: Wormhole): Teleport option =
 
 let draw (sb: SpriteBatch) (t: Texture2D) (w: Wormhole): unit =
     let color = toColor w.Color
-    let drawEntrance (e: Vector2) = 
-        let rect = Rectangle(int e.X, int e.Y, Tile.size, Tile.size)
+    let drawEntrance (e: Tile.Tile) = 
+        let rect = Tile.toRect e
         sb.Draw(t, rect, color) 
-    w.EntranceA |> Tile.toVector2 |> drawEntrance
-    w.EntranceB |> Tile.toVector2 |> drawEntrance
+    w.EntranceA |> drawEntrance
+    w.EntranceB |> drawEntrance

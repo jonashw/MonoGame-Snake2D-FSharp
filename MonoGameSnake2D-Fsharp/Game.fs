@@ -17,6 +17,18 @@ type Game1 () as x =
             (60,5)
             (25,5)
             (X, Positive)
+    let blocks = 
+        let makePerimeter (x1,y1) (x2,y2): Tile.Tile list = 
+            List.concat
+                [
+                    [y1..y2] |> List.collect (fun y -> [x1,y; x2,y])
+                    [x1..x2] |> List.collect (fun x -> [x,y1; x,y2])
+                ]
+        List.concat 
+            [
+                makePerimeter ( 0, 0) (79,47) //level border
+                makePerimeter (20,10) (59,35) //inner cloister
+            ]
     let wormholes = 
         [ Wormhole.makeWormhole 
             (Complement,Normal) 
@@ -77,5 +89,6 @@ type Game1 () as x =
         do Snake.draw spriteBatch pixelTexture snake
         for wh in wormholes do
             Wormhole.draw spriteBatch pixelTexture wh
+        for b in blocks do
+            Block.draw spriteBatch pixelTexture b
         spriteBatch.End()
-        ()

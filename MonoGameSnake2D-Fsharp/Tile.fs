@@ -8,3 +8,6 @@ type Tile = int * int
 
 let toVector2 (x,y) =
     Vector2(float32 <| size * x, float32 <| size * y)
+
+let toRect (x,y) =
+    Rectangle(x * size, y * size, size, size)
