@@ -79,7 +79,7 @@ let update (elapsedGameTime: TimeSpan) (staticObstacleIn: Tile -> bool) (b: Boun
                if allowedMovementAmount < desiredMovementAmount
                then 
                    let nextVelocity = reflectVelocity axisOfMovement currentVelocity
-                   printfn "BOUNCY BLOCK COLLISION! Velocity changed from %A to %A" currentVelocity nextVelocity
+                   printfn "A BouncyBlock collided with a Block. Velocity changed from %A to %A" currentVelocity nextVelocity
                    allowedMovementAmount, nextVelocity
                else
                    desiredMovementAmount, currentVelocity

@@ -108,7 +108,6 @@ type Game1 () as x =
             nextHeading
             |> Option.filter (fun _ -> Snake.isTileDigital snake)
         let teleport = wormholes |> List.tryPick (Wormhole.tryTeleport <| Snake.headPosition snake)
-        printfn "teleport: %A" teleport
         do snake <- Snake.update snake nextGridOkHeading newPowerUp teleport (gameTime.ElapsedGameTime) 
         bouncyBlocks <- bouncyBlocks |> List.map (BouncyBlock.update gameTime.ElapsedGameTime staticObstacleIn)
  

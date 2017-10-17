@@ -9,8 +9,7 @@ open PowerUp
 type Snake = 
     private { Segments: (Vector2 * Vector2) list
             ; Heading: Heading
-            ; GrowthLengthLeft: int
-            }
+            ; GrowthLengthLeft: int }
 
 let isTileDigital snake = 
     match snake.Segments with
@@ -27,8 +26,7 @@ let headPosition s =
 let makeSnake h t H =
     { Segments = [h |> Tile.toVector2,t |> Tile.toVector2]
     ; Heading = H
-    ; GrowthLengthLeft = 0
-    }
+    ; GrowthLengthLeft = 0 }
 
 let private powerUpGrowthLength = function
 | Regular -> 5
@@ -56,22 +54,18 @@ let update
     let growthLengthLeft = snake.GrowthLengthLeft + newGrowth
     match snake.Segments, validNewHeading, headTeleport with
     | [], _, _ -> 
-        printfn "invalid snake"
         (* This is an "invalid" snake!
         ** The safest thing to do is to recognize its possibility and pass the buck. *)
         snake
     | (head,_) :: _ as segments, Some h, _ -> 
-        printfn "new heading!"
         (* The head departs from its former location with a new heading.
         ** The old segment crystallizes, and we start a new segment.
         ** Initially, the 2 vertices of the segment have the same position.
         ** Of course, as time passes, the leading vertex advances.  *) 
         { Segments = (head,head) :: segments
         ; Heading = h
-        ; GrowthLengthLeft = snake.GrowthLengthLeft
-        }
+        ; GrowthLengthLeft = snake.GrowthLengthLeft }
     | [(head,tail)], None, None ->
-        printfn "simplest movement!"
         (* The snake is composed of a single segment (a straight line).
         ** Advance the head and tail with the same heading, when appropriate. *)
         let newHead = head + headingUnitVector
@@ -81,10 +75,8 @@ let update
             else tail + headingUnitVector, 0
         { Segments = [(newHead,newTail)] 
         ; Heading = snake.Heading
-        ; GrowthLengthLeft = newGrowthLengthLeft
-        }
+        ; GrowthLengthLeft = newGrowthLengthLeft }
     | (head, headMate) :: laterSegments, None, Some teleport ->
-        printfn "teleport!"
         (* The head is about to teleport!
         ** For simplicity, let's ignore Growth/Shrinkage. 
         ** The heading could change during teleport in the future, but no change is possible for now. *)
@@ -94,10 +86,8 @@ let update
         let nextHead = teleport.To + teleportOffset
         { Segments = (nextHead, nextHead) :: (head, headMate) :: laterSegments
         ; Heading = nextHeading
-        ; GrowthLengthLeft = growthLengthLeft
-        }
+        ; GrowthLengthLeft = growthLengthLeft }
     | (head, headMate) :: laterSegments, None, None ->
-        printfn "movement!"
         (* The head continues on its current heading.
         ** The tail may advance, shortening the last segment.
         ** Finally, the last segment may shrink to zero-length and be elimited. *)
@@ -108,14 +98,12 @@ let update
         then (* In this case, the last segment ceases to be relevant and is simply removed. *)
             { Segments = newFirstSegment :: middleSegments 
             ; Heading = snake.Heading
-            ; GrowthLengthLeft = growthLengthLeft
-            }
+            ; GrowthLengthLeft = growthLengthLeft }
         elif snake.GrowthLengthLeft > 0
         then (* In this case, the snake is growing via its tail, so all that changes is the head. *)
             { Segments = newFirstSegment :: laterSegments
             ; Heading = snake.Heading
-            ; GrowthLengthLeft = growthLengthLeft - 1
-            }
+            ; GrowthLengthLeft = growthLengthLeft - 1 }
         else
             (* In this case, we have normal tail shrinkage (no growth).
             ** The tail is paired with some vertex *other than* the head, 
@@ -126,8 +114,7 @@ let update
             let newTail = tail + tailAdvancementUnitVector
             { Segments = newFirstSegment :: middleSegments @ [(tailPrior, newTail)]
             ; Heading = snake.Heading
-            ; GrowthLengthLeft = 0
-            }
+            ; GrowthLengthLeft = 0 }
 
 let normalColor = Primary, Low
 let growingColor = SecondaryB, High
@@ -140,4 +127,3 @@ let draw (sb: SpriteBatch) (t: Texture2D) (snake: Snake): unit =
         let y = int <| Math.Min(a.Y, b.Y)
         let r = new Rectangle(x, y, w + Tile.size, h + Tile.size)
         sb.Draw(t, r, color) 
-    ()
