@@ -62,7 +62,11 @@ let update (elapsedGameTime: TimeSpan) (staticObstacleIn: Tile -> bool) (b: Boun
             |> List.sortBy (fun t -> Vector2.DistanceSquared(b.Position, t |> Tile.toVector2))
         let nextClosestObstacleTile = nextClosestTiles |> List.tryFind staticObstacleIn
         //4. The total movement of the player along that direction is then the min between the distance to the closest obstacle and the amount you wanted to move in the first place.
-        let desiredMovementAmount = System.Math.Abs(vectorComponent currentVelocity axisOfMovement)
+        let positionCorrectionDueToRounding = 
+            let initial = vectorComponent currentPosition axisOfMovement
+            let floor = System.Math.Floor(initial |> float) |> float32
+            System.Math.Abs(initial - floor)
+        let desiredMovementAmount = System.Math.Abs(vectorComponent currentVelocity axisOfMovement) + positionCorrectionDueToRounding
         let movementAmount, nextVelocity = 
             match nextClosestObstacleTile with
             | None -> desiredMovementAmount, currentVelocity
