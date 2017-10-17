@@ -19,6 +19,15 @@ type Game1 () as x =
             (60,5)
             (25,5)
             (X, Positive)
+    let mutable bouncyBlocks =
+        [
+            BouncyBlock.make (30,20) (31,20)
+            BouncyBlock.make (40,34) (40,33)
+            BouncyBlock.make (50,20) (52,21)
+            BouncyBlock.make (30,20) (28,21)
+            BouncyBlock.make (50,15) (51,17)
+            BouncyBlock.make (20,15) (21,13)
+        ]
     let blocks = 
         let makePerimeter (x1,y1) (x2,y2): Tile.Tile list = 
             List.concat
@@ -31,6 +40,11 @@ type Game1 () as x =
                 makePerimeter ( 0, 0) (79,44) //level border
                 makePerimeter (20,10) (59,35) //inner cloister
             ]
+    let obstacleTiles = blocks |> Set.ofList
+    let staticObstacleIn t = obstacleTiles |> Set.contains t
+    let blockRectangles = 
+        blocks |> List.map Tile.toRect
+    //do printfn "%A" blockRectangles
     let wormholes = 
         [ Wormhole.makeWormhole 
             (Complement,Normal) 
@@ -45,7 +59,7 @@ type Game1 () as x =
         ; Wormhole.makeWormhole
             (SecondaryA,Lowest)
             (70,25)
-            (70,45)
+            (70,43)
             (Reflect)
         ]
     let mutable nextHeading = None
@@ -96,6 +110,7 @@ type Game1 () as x =
         let teleport = wormholes |> List.tryPick (Wormhole.tryTeleport <| Snake.headPosition snake)
         printfn "teleport: %A" teleport
         do snake <- Snake.update snake nextGridOkHeading newPowerUp teleport (gameTime.ElapsedGameTime) 
+        bouncyBlocks <- bouncyBlocks |> List.map (BouncyBlock.update gameTime.ElapsedGameTime staticObstacleIn)
  
     override x.Draw (gameTime) =
         pixelRenderer.Begin()
@@ -106,5 +121,7 @@ type Game1 () as x =
             Wormhole.draw spriteBatch pixelTexture wh
         for b in blocks do
             Block.draw spriteBatch pixelTexture b
+        for b in bouncyBlocks do
+            BouncyBlock.draw spriteBatch pixelTexture b
         spriteBatch.End()
         pixelRenderer.End()

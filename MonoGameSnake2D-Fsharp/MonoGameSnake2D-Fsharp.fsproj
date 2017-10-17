@@ -62,6 +62,7 @@
     <Compile Include="Tile.fs" />
     <Compile Include="PalleteColor.fs" />
     <Compile Include="Block.fs" />
+    <Compile Include="BouncyBlock.fs" />
     <Compile Include="PowerUp.fs" />
     <Compile Include="Wormhole.fs" />
     <Compile Include="Snake.fs" />

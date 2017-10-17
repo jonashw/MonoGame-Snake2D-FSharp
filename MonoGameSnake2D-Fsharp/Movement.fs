@@ -16,6 +16,14 @@ type Teleport =
     ; HeadingTransform: HeadingTransform
     }
 
+let otherAxis = function
+| X -> Y
+| Y -> X
+
+let reverse = function
+| Positive -> Negative
+| Negative -> Positive
+
 let headingToUnitVector =
     function
     | (X, Positive) ->  Vector2.UnitX
@@ -47,3 +55,25 @@ let transformHeading t (axis,axisDirection as h) =
         | Y, Positive, CounterClockwise -> X, Positive
         | X, Positive, CounterClockwise -> Y, Negative
         | Y, Negative, CounterClockwise -> X, Negative
+
+let forwardEdge (rect: Rectangle) : Axis * AxisDirection -> int = function
+    | X, Negative -> rect.Left
+    | X, Positive -> rect.Right
+    | Y, Negative -> rect.Top
+    | Y, Positive -> rect.Bottom
+
+let vectorComponent (velocity: Vector2): Axis -> float32 = function
+| X -> velocity.X
+| Y -> velocity.Y
+
+let vectorAddComponent (v: Vector2) (heading: Heading) (amount: float32) =
+    match heading with
+    | X,Positive -> Vector2(v.X + amount, v.Y)
+    | X,Negative -> Vector2(v.X - amount, v.Y)
+    | Y,Positive -> Vector2(v.X, v.Y + amount)
+    | Y,Negative -> Vector2(v.X, v.Y - amount)
+
+let reflectVelocity axis (currentVelocity: Vector2) =
+    match axis with 
+    | X -> new Vector2(-currentVelocity.X,  currentVelocity.Y)
+    | Y -> new Vector2( currentVelocity.X, -currentVelocity.Y)
