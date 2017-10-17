@@ -67,6 +67,7 @@
     <Compile Include="PowerUp.fs" />
     <Compile Include="Wormhole.fs" />
     <Compile Include="Snake.fs" />
+    <Compile Include="Level.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />

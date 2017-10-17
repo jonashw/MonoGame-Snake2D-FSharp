@@ -5,8 +5,9 @@ open Microsoft.Xna.Framework.Graphics
 open PalleteColor
 open Movement
 open PixelPerfectRenderer
+open Level
 
-type Game1 () as x =
+type Game1 (level: Level) as x =
     inherit Game()
     do x.Content.RootDirectory <- "Content"
     do x.Window.Title <- "Snake!"
@@ -14,54 +15,13 @@ type Game1 () as x =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let mutable pixelTexture: Texture2D = null
     let mutable pixelRenderer = Unchecked.defaultof<PixelPerfectRenderer>
-    let mutable snake = 
-        Snake.makeSnake
-            (60,5)
-            (25,5)
-            (X, Positive)
-    let mutable bouncyBlocks =
-        [
-            BouncyBlock.make (30,20) (31,20)
-            BouncyBlock.make (40,34) (40,33)
-            BouncyBlock.make (50,20) (52,21)
-            BouncyBlock.make (30,20) (28,21)
-            BouncyBlock.make (50,15) (51,17)
-            BouncyBlock.make (20,15) (21,13)
-        ]
-    let blocks = 
-        let makePerimeter (x1,y1) (x2,y2): Tile.Tile list = 
-            List.concat
-                [
-                    [y1..y2] |> List.collect (fun y -> [x1,y; x2,y])
-                    [x1..x2] |> List.collect (fun x -> [x,y1; x,y2])
-                ]
-        List.concat 
-            [
-                makePerimeter ( 0, 0) (79,44) //level border
-                makePerimeter (20,10) (59,35) //inner cloister
-            ]
-    let obstacleTiles = blocks |> Set.ofList
-    let staticObstacleIn t = obstacleTiles |> Set.contains t
-    let blockRectangles = 
-        blocks |> List.map Tile.toRect
-    //do printfn "%A" blockRectangles
-    let wormholes = 
-        [ Wormhole.makeWormhole 
-            (Complement,Normal) 
-            (10,5) 
-            (70,40)
-            (Rotate Clockwise)
-        ; Wormhole.makeWormhole 
-            (SecondaryB,Normal) 
-            (10,40) 
-            (70,5)
-            (Noop)
-        ; Wormhole.makeWormhole
-            (SecondaryA,Lowest)
-            (70,25)
-            (70,43)
-            (Reflect)
-        ]
+    let mutable snake = level.Snake
+    let mutable bouncyBlocks = level.BouncyBlocks
+    let blocks = level.Blocks
+    let staticObstacleIn: Tile.Tile -> bool = 
+        let obstacleTiles = blocks |> Set.ofList
+        fun t -> obstacleTiles |> Set.contains t
+    let wormholes = level.Wormholes
     let mutable nextHeading = None
     let backgroundColor = Blank, Lowest
  

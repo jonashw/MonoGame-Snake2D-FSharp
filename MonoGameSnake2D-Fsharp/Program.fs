@@ -2,6 +2,6 @@
 
 [<EntryPoint>]
 let main argv = 
-    let game = new Game1()
+    let game = new Game1(Level.demo())
     game.Run()
     0 
