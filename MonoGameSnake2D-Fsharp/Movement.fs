@@ -4,7 +4,7 @@ open Microsoft.Xna.Framework
 
 type Heading = Axis * AxisDirection
 and Axis = X | Y
-and AxisDirection = Positive | Negative
+and AxisDirection = Positive | Negative 
 and HeadingTransform =
     | Noop
     | Reflect
@@ -16,13 +16,45 @@ type Teleport =
     ; HeadingTransform: HeadingTransform
     }
 
-let otherAxis = function
-| X -> Y
-| Y -> X
+let reflect ((axis,direction) : Heading): Heading =
+    let newDirection =
+        match direction with 
+        | Positive -> Negative 
+        | Negative -> Positive
+    axis, newDirection
 
-let reverse = function
-| Positive -> Negative
-| Negative -> Positive
+type Axis with
+    member x.Other = 
+        match x with 
+        | X -> Y 
+        | Y -> X
+
+type AxisDirection with
+    member x.Inverse = 
+        match x with 
+        | Positive -> Negative 
+        | Negative -> Positive
+
+type Microsoft.Xna.Framework.Vector2 with
+    member v.Component = 
+        function 
+        | X -> v.X 
+        | Y -> v.Y
+    member v.ComponentDirection = 
+        v.Component 
+        >> (fun n -> if n >= 0.0f 
+                     then Positive 
+                     else Negative)
+    member v.AddComponent  (amount: float32) =
+        function
+        | X,Positive -> Vector2(v.X + amount, v.Y)
+        | X,Negative -> Vector2(v.X - amount, v.Y)
+        | Y,Positive -> Vector2(v.X, v.Y + amount)
+        | Y,Negative -> Vector2(v.X, v.Y - amount)
+    member v.Reflect axis =
+        match axis with 
+        | X -> new Vector2(-v.X,  v.Y)
+        | Y -> new Vector2( v.X, -v.Y)
 
 let headingToUnitVector =
     function
@@ -34,12 +66,7 @@ let headingToUnitVector =
 let transformHeading t (axis,axisDirection as h) = 
     match t with
     | Noop -> h
-    | Reflect -> 
-        let newAxisDirection =
-            match axisDirection with 
-            | Positive -> Negative 
-            | Negative -> Positive
-        axis, newAxisDirection
+    | Reflect -> reflect h
     | Rotate d -> 
         (*
                Y-
@@ -56,22 +83,13 @@ let transformHeading t (axis,axisDirection as h) =
         | X, Positive, CounterClockwise -> Y, Negative
         | Y, Negative, CounterClockwise -> X, Negative
 
-let forwardEdge (rect: Rectangle) : Axis * AxisDirection -> int = function
-    | X, Negative -> rect.Left
-    | X, Positive -> rect.Right
-    | Y, Negative -> rect.Top
-    | Y, Positive -> rect.Bottom
-
-let vectorComponent (velocity: Vector2): Axis -> float32 = function
-| X -> velocity.X
-| Y -> velocity.Y
-
-let vectorAddComponent (v: Vector2) (heading: Heading) (amount: float32) =
-    match heading with
-    | X,Positive -> Vector2(v.X + amount, v.Y)
-    | X,Negative -> Vector2(v.X - amount, v.Y)
-    | Y,Positive -> Vector2(v.X, v.Y + amount)
-    | Y,Negative -> Vector2(v.X, v.Y - amount)
+type Microsoft.Xna.Framework.Rectangle with
+    member r.Edge (heading: Heading) =
+        match heading with
+        | X, Negative -> r.Left
+        | X, Positive -> r.Right
+        | Y, Negative -> r.Top
+        | Y, Positive -> r.Bottom
 
 let reflectVelocity axis (currentVelocity: Vector2) =
     match axis with 

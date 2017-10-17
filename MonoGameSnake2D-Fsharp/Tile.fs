@@ -30,19 +30,7 @@ let tilesIntersectedBy (r: Rectangle): Tile list =
         yield (x,y)
     } |> Seq.toList
 
-let private tileX (x, _) = x
-let private tileY (_, y) = y
-
-let tileComponent = function
-| Movement.Axis.X -> tileX
-| Movement.Axis.Y -> tileY
-
-let makeTile (firstAxis: Movement.Axis) (a: int) (b: int): Tile =
-    match firstAxis with
-    | Movement.X -> a,b
-    | Movement.Y -> b,a
-
-let add ((x,y): Tile) (heading: Movement.Heading) (amount: int): Tile =
+let add (heading: Movement.Heading) (amount: int) ((x,y): Tile): Tile =
     match heading with
     | (Movement.X, Movement.Negative) -> x - amount, y
     | (Movement.X, Movement.Positive) -> x + amount, y

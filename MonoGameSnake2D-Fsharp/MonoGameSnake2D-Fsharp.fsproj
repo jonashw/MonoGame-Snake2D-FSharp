@@ -60,6 +60,7 @@
     <Compile Include="ListOperations.fs" />
     <Compile Include="Movement.fs" />
     <Compile Include="Tile.fs" />
+    <Compile Include="Physics.fs" />
     <Compile Include="PalleteColor.fs" />
     <Compile Include="Block.fs" />
     <Compile Include="BouncyBlock.fs" />
