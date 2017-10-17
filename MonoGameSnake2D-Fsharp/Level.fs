@@ -16,6 +16,13 @@ let private makePerimeter (x1,y1) (x2,y2): Tile.Tile list =
             [x1..x2] |> List.collect (fun x -> [x,y1; x,y2])
         ]
 
+let private makePerimeterPairs (x1,y1) (x2,y2): (Tile.Tile * Tile.Tile) list =
+    List.concat
+        [
+            [x1..x2] |> List.map (fun x -> (x,y1), (x,y2))
+            [y1..y2] |> List.map (fun y -> (x1,y), (x2,y))
+        ]
+
 let demo () =
     { Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
     ; BouncyBlocks =
@@ -50,4 +57,14 @@ let demo () =
             (70,43)
             (Reflect)
         ]
+    }
+
+let simpleWrapper () =
+    { Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
+    ; BouncyBlocks = []
+    ; Blocks = [ ]
+    ; Wormholes = 
+        makePerimeterPairs (-1, -1) (80,45)
+        |> List.map (fun (a,b) ->
+            Wormhole.makeWormhole (Complement,Normal) a b Noop)
     }
