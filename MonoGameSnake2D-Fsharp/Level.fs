@@ -26,7 +26,7 @@ let private makePerimeterPairs (x1,y1) (x2,y2): (Tile.Tile * Tile.Tile) list =
 
 let demo () =
     { WidthInTiles = 80
-    ; Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
+    ; Snake = Snake.makeSnake (60,5) (25,5) (X, Positive) 1.25f
     ; BouncyBlocks =
         [
             BouncyBlock.make (30,20) (31,20)
@@ -65,7 +65,7 @@ let simpleWrapper () =
     let w = 16
     let h = (float w) / (16.0 / 9.0) |> int
     { WidthInTiles = w
-    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive)
+    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive) 1.0f
     ; BouncyBlocks = []
     ; Blocks = [ ]
     ; Wormholes = 
@@ -78,7 +78,7 @@ let huuuge () =
     let w = 16 * 18
     let h = (float w) / (16.0 / 9.0) |> int
     { WidthInTiles = w
-    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive)
+    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive) 5.0f
     ; BouncyBlocks = []
     ; Blocks = [ ]
     ; Wormholes = 

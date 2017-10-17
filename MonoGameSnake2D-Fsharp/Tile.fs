@@ -11,8 +11,11 @@ type Tile = int * int
 let toVector2 (x,y) =
     Vector2(float32 <| size * x, float32 <| size * y)
 
-let toRect (x,y) =
+let toRect ((x,y): Tile) =
     Rectangle(x * size, y * size, size, size)
+
+let toRectF ((x,y): Tile) =
+    RectangleF.fromParts (x * size |> float32) (y * size |> float32) sizeF32 sizeF32
 
 let fromVector2 (v: Vector2): Tile =
     let x = int <| v.X / sizeF32

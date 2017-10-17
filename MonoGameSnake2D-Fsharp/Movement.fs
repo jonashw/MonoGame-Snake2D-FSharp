@@ -11,8 +11,7 @@ and HeadingTransform =
     | Rotate of CircularDirection
 and CircularDirection = Clockwise | CounterClockwise
 type Teleport = 
-    { From: Vector2
-    ; To: Vector2
+    { To: Vector2
     ; HeadingTransform: HeadingTransform
     }
 
@@ -45,7 +44,7 @@ type Microsoft.Xna.Framework.Vector2 with
         >> (fun n -> if n >= 0.0f 
                      then Positive 
                      else Negative)
-    member v.AddComponent  (amount: float32) =
+    member v.AddComponent  (amount: float32): Heading -> Vector2 =
         function
         | X,Positive -> Vector2(v.X + amount, v.Y)
         | X,Negative -> Vector2(v.X - amount, v.Y)
@@ -90,6 +89,20 @@ type Microsoft.Xna.Framework.Rectangle with
         | X, Positive -> r.Right
         | Y, Negative -> r.Top
         | Y, Positive -> r.Bottom
+
+type RectangleF with
+    member r.Edge (heading: Heading) =
+        match heading with
+        | X, Negative -> r.Left
+        | X, Positive -> r.Right
+        | Y, Negative -> r.Top
+        | Y, Positive -> r.Bottom
+    member r.Corner (heading: Heading) =
+        match heading with
+        | X, Negative -> Vector2(r.Left, r.Top)
+        | X, Positive -> Vector2(r.Right, r.Top)
+        | Y, Negative -> Vector2(r.Left, r.Top)
+        | Y, Positive -> Vector2(r.Left, r.Bottom)
 
 let reflectVelocity axis (currentVelocity: Vector2) =
     match axis with 
