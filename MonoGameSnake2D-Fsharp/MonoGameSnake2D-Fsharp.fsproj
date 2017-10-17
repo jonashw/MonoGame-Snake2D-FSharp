@@ -58,6 +58,7 @@
     <Compile Include="PixelPerfectRenderer.fs" />
     <Compile Include="OptionBuilder.fs" />
     <Compile Include="ListOperations.fs" />
+    <Compile Include="RectangleF.fs" />
     <Compile Include="Movement.fs" />
     <Compile Include="Tile.fs" />
     <Compile Include="Physics.fs" />
