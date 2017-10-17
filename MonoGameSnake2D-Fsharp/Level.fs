@@ -4,7 +4,8 @@ open Movement
 open PalleteColor
 
 type Level = 
-    { Blocks: Block.Block list
+    { WidthInTiles: int // NOTE: Because the game uses an aspect ratio of 16:9, this number out to be a multiple of 16.
+    ; Blocks: Block.Block list
     ; Snake: Snake.Snake
     ; BouncyBlocks: BouncyBlock.BouncyBlock list
     ; Wormholes: Wormhole.Wormhole list }
@@ -24,7 +25,8 @@ let private makePerimeterPairs (x1,y1) (x2,y2): (Tile.Tile * Tile.Tile) list =
         ]
 
 let demo () =
-    { Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
+    { WidthInTiles = 80
+    ; Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
     ; BouncyBlocks =
         [
             BouncyBlock.make (30,20) (31,20)
@@ -60,11 +62,27 @@ let demo () =
     }
 
 let simpleWrapper () =
-    { Snake = Snake.makeSnake (60,5) (25,5) (X, Positive)
+    let w = 16
+    let h = (float w) / (16.0 / 9.0) |> int
+    { WidthInTiles = w
+    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive)
     ; BouncyBlocks = []
     ; Blocks = [ ]
     ; Wormholes = 
-        makePerimeterPairs (-1, -1) (80,45)
+        makePerimeterPairs (-1, -1) (w,h)
+        |> List.map (fun (a,b) ->
+            Wormhole.makeWormhole (Complement,Normal) a b Noop)
+    }
+
+let huuuge () =
+    let w = 16 * 18
+    let h = (float w) / (16.0 / 9.0) |> int
+    { WidthInTiles = w
+    ; Snake = Snake.makeSnake (w*2/3,5) (w/3,5) (X, Positive)
+    ; BouncyBlocks = []
+    ; Blocks = [ ]
+    ; Wormholes = 
+        makePerimeterPairs (-1, -1) (w,h)
         |> List.map (fun (a,b) ->
             Wormhole.makeWormhole (Complement,Normal) a b Noop)
     }

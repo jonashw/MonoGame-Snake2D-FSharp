@@ -33,16 +33,18 @@ type Game1 (level: Level) as x =
         ** Furthermore, all levels will be playable in either landscape or portrait orientation.
         ** A transition from one orientation to the other mid-game should not affect gameplay in any way;
         ** the player will simply have a new perspective on the current level. 
-        ** For now, let's use a fixed level size of 80 tiles x 45 tiles *)
-        let aspectRatio = 16.0f / 9.0f
-        let getScreenResolutionByWidth width = 
-            let height = (float32 width) / aspectRatio |> int
-            {Width = width; Height = height}
+        ** Each level has the ability to specify its own size. *)
+        pixelRenderer <- 
+            let levelWidthInPixels = level.WidthInTiles * Tile.size
+            let getScreenResolutionByWidth width = 
+                let aspectRatio = 16.0f / 9.0f
+                let height = (float32 width) / aspectRatio |> int
+                {Width = width; Height = height}
+            new PixelPerfectRenderer(
+                graphics,
+                (getScreenResolutionByWidth levelWidthInPixels), 
+                (getScreenResolutionByWidth graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width))
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
-        pixelRenderer <- new PixelPerfectRenderer(
-            graphics,
-            (getScreenResolutionByWidth 800), 
-            (getScreenResolutionByWidth 2000))
         base.Initialize()
  
     override x.LoadContent() =
