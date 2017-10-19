@@ -57,17 +57,16 @@ let makeSnake (head: Tile.Tile) (H:Heading) (lengthInTiles: int) (s: float32) =
     ; SpeedFactor = s }
 
 let shrinkRect (r: RectangleF) (delta: Vector2) (heading: Heading): RectangleF =
-    //printfn "shrinkRect(delta=%A ; heading=%A" delta heading
     let { Min=m ; Max=M } = r
     match heading with
-    | _, Negative -> (* sub from MAX *) RectangleF.fromMinAndMax m (M+delta)
-    | _, Positive -> (* sub from min *) RectangleF.fromMinAndMax (m+delta) M
+    | _, Negative -> RectangleF.fromMinAndMax m (M + delta)
+    | _, Positive -> RectangleF.fromMinAndMax (m + delta) M
 
 let growRect (r: RectangleF) (delta: Vector2) (heading: Heading): RectangleF =
     let { Min=m ; Max=M } = r
     match heading with
-    | _, Negative -> (* add to min *) RectangleF.fromMinAndMax (m+delta) M
-    | _, Positive -> (* add to MAX *) RectangleF.fromMinAndMax m (M+delta)
+    | _, Negative -> RectangleF.fromMinAndMax (m + delta) M
+    | _, Positive -> RectangleF.fromMinAndMax m (M + delta)
 
 let getNextSegment ({ Rect = prevRect ; Heading = prevHeading } as prev: SnakeSegment) (nextHeading: Heading): SnakeSegment =
     let s = Vector2(Tile.sizeF32, Tile.sizeF32)
@@ -75,9 +74,9 @@ let getNextSegment ({ Rect = prevRect ; Heading = prevHeading } as prev: SnakeSe
     let next m M = { Rect = RectangleF.fromMinAndMax m M ; Heading = nextHeading }
     match prevHeading, nextHeading with
     | (X, Negative), (Y, _)
-    | (Y, Negative), (X, _) -> next m (m+s)
+    | (Y, Negative), (X, _) -> next m (m + s)
     | (X, Positive), (Y, _) 
-    | (Y, Positive), (X, _) -> next (M-s) M
+    | (Y, Positive), (X, _) -> next (M - s) M
     | _ -> prev
 
 let private updatePowerup (powerup: PowerUp option) (snake: Snake) : Snake = 
@@ -87,31 +86,23 @@ let private updatePowerup (powerup: PowerUp option) (snake: Snake) : Snake =
         let boost = match pu with Regular -> 5 | Big -> 10 | Jumbo -> 20
         { snake with GrowthLengthLeft = snake.GrowthLengthLeft + boost }
 
-let private updateTurn (h: Heading option) (snake: Snake): Snake = 
-    match h with
-    | None -> snake
-    | Some turnHeading -> 
-        (* The head departs from its former location with a new heading.
-        ** The old segment crystallizes, and we start a new segment.
-        ** Initially, the 2 vertices of the segment have the same position.
-        ** Of course, as time passes, the leading vertex advances.  
-        ** For simplicity, let's ignore tail Growth/Shrinkage during in this case. *)
-        (* The heading corresponding to a 90-degree turn (a valid turn)
-        ** will have a unit vector that is *orthogonal* to the current heading's unit vector.
-        ** We can determine orthogonality with Vector2.Dot *)
-        if Vector2.Dot(headingToUnitVector snake.LeadSegment.Heading, headingToUnitVector turnHeading) <> 0.0f 
-        then snake
-        else 
-            { snake with LeadSegment = (getNextSegment snake.LeadSegment turnHeading) 
-                       ; FollowSegments = snake.LeadSegment :: snake.FollowSegments }
+let private updateTurn (turnHeadingOption: Heading option) (snake: Snake): Snake = 
+    turnHeadingOption
+    |> Option.filter (orthogonal snake.LeadSegment.Heading)
+    |> function
+       | None -> snake
+       | Some turnHeading -> 
+           (* The head departs from its former location with a new heading.
+           ** The old segment crystallizes, and we start a new segment. *)
+           { snake with LeadSegment = getNextSegment snake.LeadSegment turnHeading 
+                      ; FollowSegments = snake.LeadSegment :: snake.FollowSegments }
 
 let private updateTeleport (t: Teleport option) (snake: Snake): Snake = 
     match t with
     | None -> snake
     | Some teleport ->
         (* The head is about to teleport!
-        ** Note that the heading can change during teleport.
-        ** For simplicity, let's ignore Growth/Shrinkage during in this case. *)
+        ** Note that the heading can change during teleport. *)
         let nextHeading = snake.LeadSegment.Heading |> transformHeading (teleport.HeadingTransform)
         // To prevent an infinite loop, we have to make sure the snake exits the wormhole completely.
         let newLeadSegment = { Rect = getLeadRectAfterRect teleport.To nextHeading ; Heading = nextHeading }

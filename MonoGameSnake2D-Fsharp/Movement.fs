@@ -15,6 +15,9 @@ type Teleport =
     ; HeadingTransform: HeadingTransform
     }
 
+let orthogonal (a: Heading) (b: Heading) =
+    (fst a) <> (fst b)
+
 let reflect ((axis,direction) : Heading): Heading =
     let newDirection =
         match direction with 
