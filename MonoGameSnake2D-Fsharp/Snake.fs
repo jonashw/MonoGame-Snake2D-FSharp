@@ -110,49 +110,28 @@ let private updateTeleport (t: Teleport option) (snake: Snake): Snake =
         ; GrowthLengthLeft = snake.GrowthLengthLeft 
         ; SpeedFactor = snake.SpeedFactor }
 
-let private updateTimePassing (elapsed: TimeSpan) (snake: Snake): Snake = 
-    let followSegments = snake.FollowSegments
-    (* The head continues on its current heading.
-    ** The tail may advance, shortening the last segment.
-    ** Finally, the last segment may shrink to zero-length and be elimited. *)
-    let { Rect = leadRect ; Heading = leadHeading } = snake.LeadSegment
+let private updateHead (elapsed: TimeSpan) (snake: Snake): Snake = 
+    let positionDelta = Vector2.Multiply(headingToUnitVector snake.LeadSegment.Heading, snake.SpeedFactor)
+    let newLeadSegment = { snake.LeadSegment with Rect = (growRect snake.LeadSegment.Rect positionDelta snake.LeadSegment.Heading) }
+    { snake with LeadSegment = newLeadSegment }
+
+let private updateTailAndGrowth (elapsed: TimeSpan) (snake: Snake): Snake = 
+    let shrink lastSegment = 
+        let tailPositionDelta = Vector2.Multiply(headingToUnitVector lastSegment.Heading, snake.SpeedFactor)
+        { lastSegment with Rect = shrinkRect lastSegment.Rect tailPositionDelta lastSegment.Heading }
     let { Rect = lastSegmentRect ; Heading = lastSegmentHeading } as lastSegment = 
         snake.FollowSegments
         |> List.tryLast 
         |> Option.defaultValue (snake.LeadSegment)
-    let positionDelta = Vector2.Multiply(headingToUnitVector leadHeading, snake.SpeedFactor)
-    let newFirstSegment = { Rect = (growRect leadRect positionDelta leadHeading) ; Heading = leadHeading }
-    match lastSegmentRect.IsEmpty || lastSegmentRect.IsInverted, snake.GrowthLengthLeft > 0 with
-    | true, _ -> 
-        printfn "EMPTY!"
-        (* In this case, the last segment ceases to be relevant and is simply removed. *)
-        { LeadSegment = newFirstSegment
-        ; FollowSegments = followSegments |> ListOperations.tryDropLast
-        ; GrowthLengthLeft = 0
-        ; SpeedFactor = snake.SpeedFactor }
-    | _, true -> 
-        (* In this case, the snake is growing via its tail, so all that changes is the head. *)
-        { LeadSegment = newFirstSegment
-        ; FollowSegments = followSegments
-        ; GrowthLengthLeft = snake.GrowthLengthLeft - 1 
-        ; SpeedFactor = snake.SpeedFactor }
-    | false, _ ->
-        (* In this case, we have normal tail shrinkage (no growth). *)
-        let tailPositionDelta = Vector2.Multiply(headingToUnitVector lastSegmentHeading, snake.SpeedFactor)
-        let newTailSegment = { Rect = shrinkRect lastSegmentRect tailPositionDelta lastSegmentHeading
-                             ; Heading = lastSegmentHeading }
-        //printfn "shrink the tail by %A. %A -> %A" tailPositionDelta lastSegment newTailSegment
-        if snake.LeadSegment = lastSegment
-        then 
-            { LeadSegment = newFirstSegment 
-            ; FollowSegments = [] //[newTailSegment]
-            ; GrowthLengthLeft = 0
-            ; SpeedFactor = snake.SpeedFactor }
-        else 
-            { LeadSegment = newFirstSegment 
-            ; FollowSegments = (followSegments |> ListOperations.tryDropLast) @ [newTailSegment]
-            ; GrowthLengthLeft = 0
-            ; SpeedFactor = snake.SpeedFactor }
+    match snake.GrowthLengthLeft > 0, snake.FollowSegments with
+    | true,  _  -> { snake with GrowthLengthLeft = snake.GrowthLengthLeft - 1}  
+    | false, [] -> { snake with LeadSegment = shrink snake.LeadSegment }
+    | false, _  -> 
+        let followInit = snake.FollowSegments |> ListOperations.tryDropLast
+        let newLast = snake.FollowSegments |> Seq.last |> shrink 
+        if newLast.Rect.IsEmpty || newLast.Rect.IsInverted
+        then { snake with FollowSegments = followInit }
+        else { snake with FollowSegments = followInit @ [newLast] }
 
 let update (snake: Snake) 
     (turn: Heading option) 
@@ -163,7 +142,8 @@ let update (snake: Snake)
         |> updatePowerup powerup
         |> updateTeleport teleport
         |> updateTurn turn
-        |> updateTimePassing elapsed
+        |> updateHead elapsed
+        |> updateTailAndGrowth elapsed
 
 let normalColor = Primary, Low
 let growingColor = SecondaryB, High
