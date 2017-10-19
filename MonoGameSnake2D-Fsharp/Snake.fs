@@ -7,162 +7,187 @@ open Movement
 open PowerUp
 
 type Snake = 
-    private { Segments: (Vector2 * Vector2) list
-            ; Heading: Heading
+    private { Segments: SnakeSegment list
             ; GrowthLengthLeft: int 
             ; SpeedFactor: float32 }
-
-let segmentToRectF (a: Vector2, b: Vector2): RectangleF =
-    RectangleF.fromParts 
-        (Math.Min(a.X, b.X))
-        (Math.Min(a.Y, b.Y))
-        (Tile.sizeF32 + Math.Abs(a.X - b.X))
-        (Tile.sizeF32 + Math.Abs(a.Y - b.Y))
+and SnakeSegment = RectangleF * Heading
 
 let isTileDigital snake = 
     match snake.Segments with
     | [] -> true
-    | (head,_) :: _ -> 
-        ((int head.X) % Tile.size) = 0 &&
-        ((int head.Y) % Tile.size) = 0
+    | (r, h) :: _ -> ((r.Edge h |> int) % Tile.size) = 0
 
-let headPosition s =
-    match s.Segments with
-    | [] -> Vector2(-100.0f, -100.0f)
-    | (head,_) :: _ -> head
+let private getLeadRect (head: Vector2) H lengthInTiles =
+    //The head position given here could be interpreted as either Min or Max, depending on the Heading.
+    (*                       .-.           H = heading
+        H=X+                 | | H=Y+      h = head position
+       .----.                '-M           m = min
+       '----M h m----.         h           M = MAX
+                '----'         m-.         
+                 H=X-          | |   H=Y-
+                               '-' 
+    *)
+    let h = head 
+    let l = Tile.size * lengthInTiles |> float32
+    let s = Tile.sizeF32
+    match H with
+    | X, Negative -> (* min *) RectangleF.fromMinAndMax h (Vector2(h.X + l, h.Y + s))
+    | Y, Negative -> (* min *) RectangleF.fromMinAndMax h (Vector2(h.X + s, h.Y + l))
+    | X, Positive -> (* MAX *) RectangleF.fromMinAndMax (Vector2(h.X - l, h.Y - s)) h 
+    | Y, Positive -> (* MAX *) RectangleF.fromMinAndMax (Vector2(h.X - s, h.Y - l)) h 
 
-let makeSnake h t H s =
-    { Segments = [ h |> Tile.toVector2, t |> Tile.toVector2 ]
-    ; Heading = H
+let makeSnake (head: Tile.Tile) (H:Heading) (lengthInTiles: int) (s: float32) =
+    { Segments = [ getLeadRect (head |> Tile.toVector2) H lengthInTiles, H ]
     ; GrowthLengthLeft = 0
     ; SpeedFactor = s }
 
-let private powerUpGrowthLength = function
-| Regular -> 5
-| Big -> 10
-| Jumbo -> 20
+let shrinkRect (r: RectangleF) (delta: Vector2) (heading: Heading): RectangleF =
+    //printfn "shrinkRect(delta=%A ; heading=%A" delta heading
+    let { Min=m ; Max=M } = r
+    match heading with
+    | _, Negative -> (* sub from MAX *) RectangleF.fromMinAndMax m (M+delta)
+    | _, Positive -> (* sub from min *) RectangleF.fromMinAndMax (m+delta) M
 
-let update 
-    (snake: Snake) 
-    (newHeading: Heading option) 
-    (newPowerUp: PowerUp option)
-    (headTeleport: Teleport option)
-    (gameTimeElapse: TimeSpan): Snake =
-    let positionDelta = Vector2.Multiply(headingToUnitVector snake.Heading, snake.SpeedFactor)
-    let validNewHeading = 
-        newHeading
-        |> Option.bind (fun h -> 
-            let newUv = headingToUnitVector h
+let growRect (r: RectangleF) (delta: Vector2) (heading: Heading): RectangleF =
+    let { Min=m ; Max=M } = r
+    match heading with
+    | _, Negative -> (* add to min *) RectangleF.fromMinAndMax (m+delta) M
+    | _, Positive -> (* add to MAX *) RectangleF.fromMinAndMax m (M+delta)
+
+let getNextSegment ((prevRect,prevHeading) as prev: SnakeSegment) (nextHeading: Heading): SnakeSegment =
+    let s = Vector2(Tile.sizeF32, Tile.sizeF32)
+    let m, M = prevRect.Min, prevRect.Max
+    let next m M = RectangleF.fromMinAndMax m M, nextHeading
+    match prevHeading, nextHeading with
+    | (X, Negative), (Y, _)
+    | (Y, Negative), (X, _) -> next m (m+s)
+    | (X, Positive), (Y, _) 
+    | (Y, Positive), (X, _) -> next (M-s) M
+    | _ -> prev
+
+let private updatePowerup (powerup: PowerUp option) (snake: Snake) : Snake = 
+    match powerup with
+    | None -> snake
+    | Some pu ->
+        let boost = match pu with Regular -> 5 | Big -> 10 | Jumbo -> 20
+        { snake with GrowthLengthLeft = snake.GrowthLengthLeft + boost }
+
+let private updateTurn (h: Heading option) (snake: Snake): Snake = 
+    match h with
+    | None -> snake
+    | Some turnHeading -> 
+        match snake.Segments with
+        |  [] -> 
+            (* This is an "invalid" snake!
+            ** The safest thing to do is to recognize its possibility and pass the buck. *)
+            snake
+        | (_, leadHeading) as leadSegment :: _ ->
+            (* The head departs from its former location with a new heading.
+            ** The old segment crystallizes, and we start a new segment.
+            ** Initially, the 2 vertices of the segment have the same position.
+            ** Of course, as time passes, the leading vertex advances.  
+            ** For simplicity, let's ignore tail Growth/Shrinkage during in this case. *)
             (* The heading corresponding to a 90-degree turn (a valid turn)
             ** will have a unit vector that is *orthogonal* to the current heading's unit vector.
             ** We can determine orthogonality with Vector2.Dot *)
-            if Vector2.Dot(positionDelta, newUv) = 0.0f 
-            then Some h
-            else None)
-    let newGrowth = newPowerUp |> Option.map powerUpGrowthLength |> Option.defaultValue 0
-    let growthLengthLeft = snake.GrowthLengthLeft + newGrowth
-    match snake.Segments, validNewHeading, headTeleport with
-    | [], _, _ -> 
+            if Vector2.Dot(headingToUnitVector leadHeading, headingToUnitVector turnHeading) <> 0.0f 
+            then snake
+            else 
+                let updatedSegments = (getNextSegment leadSegment turnHeading) :: snake.Segments
+                { snake with Segments = updatedSegments }
+
+let private updateTeleport (t: Teleport option) (snake: Snake): Snake = 
+    match t with
+    | None -> snake
+    | Some teleport ->
+        match snake.Segments with
+        |  [] -> 
+            (* This is an "invalid" snake!
+            ** The safest thing to do is to recognize its possibility and pass the buck. *)
+            snake
+        | (_, leadHeading) :: _ ->
+            (* The head is about to teleport!
+            ** Note that the heading can change during teleport.
+            ** For simplicity, let's ignore Growth/Shrinkage during in this case. *)
+            let nextHeading = leadHeading |> transformHeading (teleport.HeadingTransform)
+            // To prevent an infinite loop, we have to make sure the snake exits the wormhole completely.
+            let teleportOffset = Vector2.Multiply(headingToUnitVector nextHeading, float32 Tile.size)
+            let newLeadSegment = (getLeadRect (teleport.To + teleportOffset) nextHeading 0), nextHeading
+            printfn "TELEPORT! %A -> %A @ %A" leadHeading nextHeading newLeadSegment
+            { Segments = newLeadSegment :: snake.Segments
+            ; GrowthLengthLeft = snake.GrowthLengthLeft 
+            ; SpeedFactor = snake.SpeedFactor }
+
+let private updateTimePassing (elapsed: TimeSpan) (snake: Snake): Snake = 
+    match snake.Segments with
+    |  [] -> 
         (* This is an "invalid" snake!
         ** The safest thing to do is to recognize its possibility and pass the buck. *)
         snake
-    | (head,_) :: _ as segments, Some h, _ -> 
-        (* The head departs from its former location with a new heading.
-        ** The old segment crystallizes, and we start a new segment.
-        ** Initially, the 2 vertices of the segment have the same position.
-        ** Of course, as time passes, the leading vertex advances.  *) 
-        { Segments = (head,head) :: segments
-        ; Heading = h
-        ; GrowthLengthLeft = snake.GrowthLengthLeft
-        ; SpeedFactor = snake.SpeedFactor }
-    | [(head,tail)], None, None ->
-        (* The snake is composed of a single segment (a straight line).
-        ** Advance the head and tail with the same heading, when appropriate. *)
-        let newHead = head + positionDelta
-        let newTail, newGrowthLengthLeft = 
-            if snake.GrowthLengthLeft > 0
-            then tail, growthLengthLeft - 1
-            else tail + positionDelta, 0
-        { Segments = [(newHead,newTail)] 
-        ; Heading = snake.Heading
-        ; GrowthLengthLeft = newGrowthLengthLeft
-        ; SpeedFactor = snake.SpeedFactor }
-    | (head, headMate) :: laterSegments, None, Some teleport ->
-        (* The head is about to teleport!
-        ** For simplicity, let's ignore Growth/Shrinkage. 
-        ** The heading could change during teleport in the future, but no change is possible for now. *)
-        let nextHeading = snake.Heading |> transformHeading (teleport.HeadingTransform)
-        // To prevent an infinite loop, we have to make sure the snake exits the wormhole completely.
-        printfn "TELEPORT!"
-        let teleportOffset = Vector2.Multiply(headingToUnitVector nextHeading, float32 Tile.size)
-        let nextHead = teleport.To + teleportOffset
-        { Segments = (nextHead, nextHead) :: (head, headMate) :: laterSegments
-        ; Heading = nextHeading
-        ; GrowthLengthLeft = growthLengthLeft 
-        ; SpeedFactor = snake.SpeedFactor }
-    | (head, headMate) :: laterSegments, None, None ->
+    | (leadRect, leadHeading) as leadSegment :: followSegments ->
         (* The head continues on its current heading.
         ** The tail may advance, shortening the last segment.
         ** Finally, the last segment may shrink to zero-length and be elimited. *)
-        let middleSegments = laterSegments |> ListOperations.dropLast
-        let (tailPrior,tail) = laterSegments |> Seq.last
-        let newFirstSegment = (head + positionDelta, headMate)
-        if tail = tailPrior 
-        then (* In this case, the last segment ceases to be relevant and is simply removed. *)
-            { Segments = newFirstSegment :: middleSegments 
-            ; Heading = snake.Heading
-            ; GrowthLengthLeft = growthLengthLeft
-            ; SpeedFactor = snake.SpeedFactor }
-        elif snake.GrowthLengthLeft > 0
-        then (* In this case, the snake is growing via its tail, so all that changes is the head. *)
-            { Segments = newFirstSegment :: laterSegments
-            ; Heading = snake.Heading
-            ; GrowthLengthLeft = growthLengthLeft - 1 
-            ; SpeedFactor = snake.SpeedFactor }
-        else
-            (* In this case, we have normal tail shrinkage (no growth).
-            ** The tail is paired with some vertex *other than* the head, 
-            ** so may need to advance in a different heading.
-            ** We can derive this heading with some help from the tail's mate. *)
-            let tailPositionDelta = 
-                let tailAdvancementUnitVector = tailPrior - tail
-                tailAdvancementUnitVector.Normalize()
-                Vector2.Multiply(tailAdvancementUnitVector, snake.SpeedFactor)
-            let newTail = tail + tailPositionDelta
-            { Segments = newFirstSegment :: middleSegments @ [(tailPrior, newTail)]
-            ; Heading = snake.Heading
+        let (lastSegmentRect,lastSegmentHeading) as lastSegment = Seq.last snake.Segments
+        let positionDelta = Vector2.Multiply(headingToUnitVector leadHeading, snake.SpeedFactor)
+        let newFirstSegment = (growRect leadRect positionDelta leadHeading), leadHeading
+        match lastSegmentRect.IsEmpty || lastSegmentRect.IsInverted, snake.GrowthLengthLeft > 0 with
+        | true, _ -> 
+            printfn "EMPTY!"
+            (* In this case, the last segment ceases to be relevant and is simply removed. *)
+            { Segments = newFirstSegment :: (followSegments |> ListOperations.tryDropLast)
             ; GrowthLengthLeft = 0
             ; SpeedFactor = snake.SpeedFactor }
+        | _, true -> 
+            (* In this case, the snake is growing via its tail, so all that changes is the head. *)
+            { Segments = newFirstSegment :: followSegments
+            ; GrowthLengthLeft = snake.GrowthLengthLeft - 1 
+            ; SpeedFactor = snake.SpeedFactor }
+        | false, _ ->
+            (* In this case, we have normal tail shrinkage (no growth). *)
+            let tailPositionDelta = Vector2.Multiply(headingToUnitVector lastSegmentHeading, snake.SpeedFactor)
+            let newTailSegment = (shrinkRect lastSegmentRect tailPositionDelta lastSegmentHeading), lastSegmentHeading
+            //printfn "shrink the tail by %A. %A -> %A" tailPositionDelta lastSegment newTailSegment
+            if leadSegment = lastSegment
+            then 
+                { Segments = [newFirstSegment ; newTailSegment]
+                ; GrowthLengthLeft = 0
+                ; SpeedFactor = snake.SpeedFactor }
+            else 
+                { Segments = newFirstSegment :: (followSegments |> ListOperations.tryDropLast) @ [newTailSegment]
+                ; GrowthLengthLeft = 0
+                ; SpeedFactor = snake.SpeedFactor }
 
-let segmentToRect (a: Vector2, b: Vector2): Rectangle =
-    Rectangle(
-        int <| Math.Min(a.X, b.X),
-        int <| Math.Min(a.Y, b.Y),
-        Tile.size + (int <| Math.Abs(a.X - b.X)),
-        Tile.size + (int <| Math.Abs(a.Y - b.Y)))
+let update (snake: Snake) 
+    (turn: Heading option) 
+    (powerup: PowerUp option)
+    (teleport: Teleport option)
+    (elapsed: TimeSpan): Snake =
+        snake
+        |> updatePowerup powerup
+        |> updateTeleport teleport
+        |> updateTurn turn
+        |> updateTimePassing elapsed
 
-let headRectangle s =
-    match s.Segments with
-    | [] -> Rectangle.Empty
-    | s :: _ -> segmentToRect s
+let normalColor = Primary, Low
+let growingColor = SecondaryB, High
+let draw (sb: SpriteBatch) (t: Texture2D) (debug: bool) (snake: Snake): unit =
+    let color = Color.Lerp(toColor normalColor, toColor growingColor, (float32 snake.GrowthLengthLeft) / 40.0f)
+    snake.Segments 
+    |> List.map (fun (r,_) -> r.Round)
+    |> List.iter (fun r -> sb.Draw(t, r, color))
+    printfn "segment count = %A" snake.Segments.Length
+    if debug then do
+        snake.Segments 
+        |> List.map (fun s -> (fst s).Round)
+        |> List.iter (sb.drawOutline t 1 Color.Black)
+        snake.Segments 
+        |> List.map fst
+        |> List.collect (fun r -> [r.Min; r.Max])
+        |> List.map (fun v -> Vector2(v.X |> int |> float32, v.Y |> int |> float32))
+        |> List.iter (fun v -> sb.Draw(t, v, Color.Magenta))
 
 let headRectangleF s =
     match s.Segments with
     | [] -> RectangleF.empty
-    | s :: _ -> segmentToRectF s
-
-let normalColor = Primary, Low
-let growingColor = SecondaryB, High
-let draw (sb: SpriteBatch) (t: Texture2D) (snake: Snake): unit =
-    let color = Color.Lerp(toColor normalColor, toColor growingColor, (float32 snake.GrowthLengthLeft) / 40.0f)
-    snake.Segments 
-    |> List.map segmentToRect
-    |> List.iter (fun r -> sb.Draw(t, r, color))
-    (*
-    snake.Segments 
-    |> List.map segmentToRect
-    |> List.iter (sb.drawOutline t 1 Color.Black)
-    snake.Segments 
-    |> List.collect (fun (a,b) -> [a; b]) 
-    |> List.iter (fun v -> sb.Draw(t, v, Color.Magenta))
-    *)
+    | (r,_) :: _ -> r

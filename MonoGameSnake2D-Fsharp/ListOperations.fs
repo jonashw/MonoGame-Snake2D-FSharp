@@ -1,7 +1,8 @@
 ﻿module ListOperations
 
-let dropLast xs =
+let tryDropLast xs =
     xs
     |> List.rev 
-    |> List.tail 
-    |> List.rev
+    |> function
+       | [] -> []
+       | last :: init -> List.rev init

@@ -30,11 +30,14 @@ type RectangleF =
             (r.Min.Y < (float32 o.Bottom)) &&
             (r.Max.X > (float32 o.Left)) &&
             (r.Max.Y > (float32 o.Top))
+    member r.IsInverted = r.Max.X < r.Min.X || r.Max.Y < r.Min.Y
     member r.IsEmpty =
             r.Min.X = 0.0f &&
             r.Min.Y = 0.0f &&
             r.Max.X = 0.0f &&
             r.Max.Y = 0.0f
+    member r.Round =
+        Rectangle(int <| r.Left, int <| r.Top, int <| r.Width, int <| r.Height)
     static member fromMinAndMax min max = { Min = min ; Max = max }
     static member fromParts x y w h = { Min = Vector2(x,y); Max = Vector2(x + w, y + h) }
 

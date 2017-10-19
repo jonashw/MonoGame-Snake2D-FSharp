@@ -16,6 +16,7 @@ type Game1 (level: Level) as x =
     let mutable pixelTexture: Texture2D = null
     let mutable pixelRenderer = Unchecked.defaultof<PixelPerfectRenderer>
     let mutable snake = level.Snake
+    let mutable debug = false
     let mutable bouncyBlocks = level.BouncyBlocks
     let blocks = level.Blocks
     let staticObstacleIn: Tile.Tile -> bool = 
@@ -43,7 +44,7 @@ type Game1 (level: Level) as x =
             new PixelPerfectRenderer(
                 graphics,
                 (getScreenResolutionByWidth levelWidthInPixels), 
-                (getScreenResolutionByWidth graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width))
+                (getScreenResolutionByWidth (graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 2)))
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
         base.Initialize()
  
@@ -66,6 +67,7 @@ type Game1 (level: Level) as x =
             elif kb.IsKeyDown(Keys.D2) then Some(PowerUp.Big)
             elif kb.IsKeyDown(Keys.D3) then Some(PowerUp.Jumbo)
             else None
+        debug <- kb.IsKeyDown(Keys.D)
         let nextGridOkHeading =
             nextHeading
             |> Option.filter (fun _ -> Snake.isTileDigital snake)
@@ -77,7 +79,7 @@ type Game1 (level: Level) as x =
         pixelRenderer.Begin()
         do x.GraphicsDevice.Clear <| toColor backgroundColor
         spriteBatch.Begin()
-        do Snake.draw spriteBatch pixelTexture snake
+        do Snake.draw spriteBatch pixelTexture debug snake 
         for wh in wormholes do
             Wormhole.draw spriteBatch pixelTexture wh
         for b in blocks do
