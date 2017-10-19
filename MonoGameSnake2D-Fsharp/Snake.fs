@@ -19,27 +19,39 @@ and SnakeSegment = { Rect: RectangleF
 let isTileDigital s = 
     ((s.LeadSegment.ForwardEdge |> int) % Tile.size) = 0
 
-let private getLeadRect (head: Vector2) H lengthInTiles =
+let private getLeadRectAtPosition (head: Vector2) H lengthInTiles =
     //The head position given here could be interpreted as either Min or Max, depending on the Heading.
-    (*                       .-.           H = heading
-        H=X+                 | | H=Y+      h = head position
-       .----.                '-M           m = min
-       '----M h m----.         h           M = MAX
-                '----'         m-.         
-                 H=X-          | |   H=Y-
+    (*                         .-.         H = heading
+        H=X+     H=X-          | |   H=Y+  h = head position
+                               '-M         m = min
+       .----. h m----.         h           M = MAX
+       '----M   '----'         m-.         
+                               | |   H=Y-
                                '-' 
     *)
-    let h = head 
     let l = Tile.size * lengthInTiles |> float32
     let s = Tile.sizeF32
+    let lx = Vector2(l, 0.0f)
+    let ly = Vector2(0.0f, l)
+    let h = Vector2(0.0f, s)
+    let w = Vector2(s, 0.0f)
     match H with
-    | X, Negative -> (* min *) RectangleF.fromMinAndMax h (Vector2(h.X + l, h.Y + s))
-    | Y, Negative -> (* min *) RectangleF.fromMinAndMax h (Vector2(h.X + s, h.Y + l))
-    | X, Positive -> (* MAX *) RectangleF.fromMinAndMax (Vector2(h.X - l, h.Y - s)) h 
-    | Y, Positive -> (* MAX *) RectangleF.fromMinAndMax (Vector2(h.X - s, h.Y - l)) h 
+    | X, Negative -> RectangleF.fromMinAndMax head (head + lx + h)
+    | Y, Negative -> RectangleF.fromMinAndMax head (head + ly + w)
+    | X, Positive -> RectangleF.fromMinAndMax (head - lx) (head + h) 
+    | Y, Positive -> RectangleF.fromMinAndMax (head - ly) (head + w) 
+
+let getLeadRectAfterRect (r: Rectangle) (heading: Heading): RectangleF =
+    let w = Vector2(r.Height |> float32, 0.0f)
+    let h = Vector2(0.0f, r.Height |> float32)
+    match heading with
+    | X, Negative -> RectangleF.fromMinAndMax r.Min (r.Min + h)
+    | Y, Negative -> RectangleF.fromMinAndMax r.Min (r.Min + w)
+    | X, Positive -> RectangleF.fromMinAndMax (r.Max - h) r.Max
+    | Y, Positive -> RectangleF.fromMinAndMax (r.Max - w) r.Max
 
 let makeSnake (head: Tile.Tile) (H:Heading) (lengthInTiles: int) (s: float32) =
-    { LeadSegment = { Rect = getLeadRect (head |> Tile.toVector2) H lengthInTiles ; Heading = H }
+    { LeadSegment = { Rect = getLeadRectAtPosition (head |> Tile.toVector2) H lengthInTiles ; Heading = H }
     ; FollowSegments = []
     ; GrowthLengthLeft = 0
     ; SpeedFactor = s }
@@ -102,8 +114,7 @@ let private updateTeleport (t: Teleport option) (snake: Snake): Snake =
         ** For simplicity, let's ignore Growth/Shrinkage during in this case. *)
         let nextHeading = snake.LeadSegment.Heading |> transformHeading (teleport.HeadingTransform)
         // To prevent an infinite loop, we have to make sure the snake exits the wormhole completely.
-        let teleportOffset = Vector2.Multiply(headingToUnitVector nextHeading, float32 Tile.size)
-        let newLeadSegment = { Rect = (getLeadRect (teleport.To + teleportOffset) nextHeading 0) ; Heading = nextHeading }
+        let newLeadSegment = { Rect = getLeadRectAfterRect teleport.To nextHeading ; Heading = nextHeading }
         printfn "TELEPORT! %A -> %A @ %A" snake.LeadSegment.Heading nextHeading newLeadSegment
         { LeadSegment = newLeadSegment 
         ; FollowSegments = snake.LeadSegment :: snake.FollowSegments
@@ -119,10 +130,6 @@ let private updateTailAndGrowth (elapsed: TimeSpan) (snake: Snake): Snake =
     let shrink lastSegment = 
         let tailPositionDelta = Vector2.Multiply(headingToUnitVector lastSegment.Heading, snake.SpeedFactor)
         { lastSegment with Rect = shrinkRect lastSegment.Rect tailPositionDelta lastSegment.Heading }
-    let { Rect = lastSegmentRect ; Heading = lastSegmentHeading } as lastSegment = 
-        snake.FollowSegments
-        |> List.tryLast 
-        |> Option.defaultValue (snake.LeadSegment)
     match snake.GrowthLengthLeft > 0, snake.FollowSegments with
     | true,  _  -> { snake with GrowthLengthLeft = snake.GrowthLengthLeft - 1}  
     | false, [] -> { snake with LeadSegment = shrink snake.LeadSegment }
@@ -139,11 +146,11 @@ let update (snake: Snake)
     (teleport: Teleport option)
     (elapsed: TimeSpan): Snake =
         snake
-        |> updatePowerup powerup
         |> updateTeleport teleport
-        |> updateTurn turn
+        |> updatePowerup powerup
         |> updateHead elapsed
         |> updateTailAndGrowth elapsed
+        |> updateTurn turn
 
 let normalColor = Primary, Low
 let growingColor = SecondaryB, High
@@ -157,7 +164,6 @@ let draw (sb: SpriteBatch) (t: Texture2D) (debug: bool) (snake: Snake): unit =
         >> List.iter (fun v -> sb.Draw(t, v, Color.Magenta))
     snake.LeadSegment |> drawSegment
     snake.FollowSegments |> List.iter drawSegment
-    printfn "segment count = %A" (snake.FollowSegments.Length + 1)
     if debug then do
         snake.LeadSegment |> drawSegmentDebug
         snake.LeadSegment |> drawSegmentDebugDots

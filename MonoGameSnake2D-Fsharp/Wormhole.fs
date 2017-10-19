@@ -6,29 +6,25 @@ open Movement
 
 type Wormhole = 
     private { Color: PalleteColor
-            ; Entrances: Tile.Tile * Tile.Tile
+            ; Entrances: Rectangle * Rectangle
             ; HeadingTransform: HeadingTransform } 
 
 let makeWormhole c ea eb ht: Wormhole = 
     { Color = c
-    ; Entrances = ea, eb
+    ; Entrances = ea |> Tile.toRect, eb |> Tile.toRect
     ; HeadingTransform = ht }
 
 let tryTeleport (projectile: RectangleF) (wh: Wormhole): Teleport option =
-    option {
-        let entranceA = wh.Entrances |> fst |> Tile.toRect
-        let entranceB = wh.Entrances |> snd |> Tile.toRect
-        if projectile.Intersects entranceA
-        then return { To = wh.Entrances |> snd |> Tile.toVector2 ; HeadingTransform = wh.HeadingTransform }
-        else
-        if projectile.Intersects entranceB
-        then return { To = wh.Entrances |> fst |> Tile.toVector2 ; HeadingTransform = wh.HeadingTransform }
-    }
+    let (ea, eb) = wh.Entrances 
+    if projectile.Intersects ea
+    then Some { To = eb ; HeadingTransform = wh.HeadingTransform }
+    else
+    if projectile.Intersects eb
+    then Some { To = ea ; HeadingTransform = wh.HeadingTransform }
+    else None
 
 let draw (sb: SpriteBatch) (t: Texture2D) (w: Wormhole): unit =
     let color = toColor w.Color
-    let drawEntrance (e: Tile.Tile) = 
-        let rect = Tile.toRect e
-        sb.Draw(t, rect, color) 
+    let drawEntrance (rect: Rectangle) = sb.Draw(t, rect, color) 
     w.Entrances |> fst |> drawEntrance
     w.Entrances |> snd |> drawEntrance

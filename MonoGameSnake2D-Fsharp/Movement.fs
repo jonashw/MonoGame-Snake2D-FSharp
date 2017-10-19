@@ -11,7 +11,7 @@ and HeadingTransform =
     | Rotate of CircularDirection
 and CircularDirection = Clockwise | CounterClockwise
 type Teleport = 
-    { To: Vector2
+    { To: Rectangle
     ; HeadingTransform: HeadingTransform
     }
 
@@ -89,6 +89,8 @@ type Microsoft.Xna.Framework.Rectangle with
         | X, Positive -> r.Right
         | Y, Negative -> r.Top
         | Y, Positive -> r.Bottom
+    member r.Min = Vector2(r.Left |> float32, r.Top |> float32)
+    member r.Max = Vector2(r.Right |> float32, r.Bottom |> float32)
 
 type RectangleF with
     member r.Edge (heading: Heading) =
