@@ -1,5 +1,5 @@
 ﻿module Tile
-
+open System
 open Microsoft.Xna.Framework
 
 let size = 10
@@ -39,3 +39,12 @@ let add (heading: Movement.Heading) (amount: int) ((x,y): Tile): Tile =
     | (Movement.X, Movement.Positive) -> x + amount, y
     | (Movement.Y, Movement.Negative) -> x, y - amount
     | (Movement.Y, Movement.Positive) -> x, y + amount
+
+let fitRect (r: RectangleF): RectangleF =
+    let roundVector (v: Vector2): Vector2 = 
+        let round n = 
+            let tileCount = Math.Round((float n) / sizeF, MidpointRounding.AwayFromZero) |> int
+            let nAdjusted = tileCount * size
+            nAdjusted |> float32
+        Vector2(round v.X, round v.Y)
+    RectangleF.fromMinAndMax (roundVector r.Min) (roundVector r.Max)

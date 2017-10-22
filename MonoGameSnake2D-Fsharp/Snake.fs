@@ -94,8 +94,9 @@ let private updateTurn (turnHeadingOption: Heading option) (snake: Snake): Snake
        | Some turnHeading -> 
            (* The head departs from its former location with a new heading.
            ** The old segment crystallizes, and we start a new segment. *)
-           { snake with LeadSegment = getNextSegment snake.LeadSegment turnHeading 
-                      ; FollowSegments = snake.LeadSegment :: snake.FollowSegments }
+           let correctedLeadSegment = { snake.LeadSegment with Rect = Tile.fitRect snake.LeadSegment.Rect }
+           { snake with LeadSegment = turnHeading |> getNextSegment correctedLeadSegment 
+                      ; FollowSegments = correctedLeadSegment :: snake.FollowSegments }
 
 let private updateTeleport (t: Teleport option) (snake: Snake): Snake = 
     match t with
