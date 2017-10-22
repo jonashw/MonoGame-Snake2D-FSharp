@@ -126,7 +126,13 @@ let private updateTailAndGrowth (elapsed: TimeSpan) (snake: Snake): Snake =
     | true,  _  -> { snake with GrowthLengthLeft = snake.GrowthLengthLeft - 1}  
     | false, [] -> { snake with LeadSegment = shrink snake.LeadSegment }
     | false, _  -> 
-        let followInit = snake.FollowSegments |> ListOperations.tryDropLast
+        let tryDropLast xs =
+            xs
+            |> List.rev 
+            |> function
+               | [] -> []
+               | last :: init -> List.rev init
+        let followInit = snake.FollowSegments |> tryDropLast
         let newLast = snake.FollowSegments |> Seq.last |> shrink 
         if newLast.Rect.IsEmpty || newLast.Rect.IsInverted
         then { snake with FollowSegments = followInit }
