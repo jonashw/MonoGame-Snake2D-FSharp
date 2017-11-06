@@ -10,18 +10,19 @@ type Level =
     ; BouncyBlocks: BouncyBlock.BouncyBlock list
     ; Wormholes: Wormhole.Wormhole list }
 
-let private makePerimeter (x1,y1) (x2,y2): Tile.Tile list = 
+let private makePerimeter bp (x1,y1) (x2,y2): Block.Block list = 
     List.concat
         [
             [y1..y2] |> List.collect (fun y -> [x1,y; x2,y])
             [x1..x2] |> List.collect (fun x -> [x,y1; x,y2])
-        ]
+        ] 
+        |> List.map (fun t -> t,bp)
 
-let private makePerimeterPairs (x1,y1) (x2,y2): (Tile.Tile * Tile.Tile) list =
+let private makePerimeterPairs bp (x1,y1) (x2,y2): (Block.Block * Block.Block) list =
     List.concat
         [
-            [x1..x2] |> List.map (fun x -> (x,y1), (x,y2))
-            [y1..y2] |> List.map (fun y -> (x1,y), (x2,y))
+            [x1..x2] |> List.map (fun x -> ((x,y1),bp), ((x,y2),bp))
+            [y1..y2] |> List.map (fun y -> ((x1,y),bp), ((x2,y),bp))
         ]
 
 let demo () =
@@ -39,8 +40,8 @@ let demo () =
     ; Blocks =
         List.concat 
             [
-                makePerimeter ( 0, 0) (79,44) //level border
-                makePerimeter (20,10) (59,35) //inner cloister
+                makePerimeter Block.NotPermissive ( 0, 0) (79,44) //level border
+                makePerimeter Block.NotPermissive (20,10) (59,35) //inner cloister
             ]
     ; Wormholes = 
         [ Wormhole.makeWormhole 
@@ -69,9 +70,9 @@ let simpleWrapper () =
     ; BouncyBlocks = []
     ; Blocks = [ ]
     ; Wormholes = 
-        makePerimeterPairs (-1, -1) (w,h)
+        makePerimeterPairs Block.NotPermissive (-1, -1) (w,h)
         |> List.map (fun (a,b) ->
-            Wormhole.makeWormhole (Complement,Normal) a b Noop)
+            Wormhole.makeWormhole (Complement,Normal) (fst a) (fst b) Noop)
     }
 
 let huuuge () =
@@ -82,7 +83,32 @@ let huuuge () =
     ; BouncyBlocks = []
     ; Blocks = [ ]
     ; Wormholes = 
-        makePerimeterPairs (-1, -1) (w,h)
+        makePerimeterPairs Block.NotPermissive (-1, -1) (w,h)
         |> List.map (fun (a,b) ->
-            Wormhole.makeWormhole (Complement,Normal) a b Noop)
+            Wormhole.makeWormhole (Complement,Normal) (fst a) (fst b) Noop)
+    }
+
+let snakePermissiveTile () =
+    let w = 32
+    let h = (float w) / (16.0 / 9.0) |> int
+    { WidthInTiles = w
+    ; Snake = Snake.makeSnake (w/6,5) (X, Negative) 5 (1.0f / 4.0f)
+    ; BouncyBlocks = 
+        [
+            BouncyBlock.make (17,5) (18,6)
+            BouncyBlock.make (19,h-5) (18,h-6)
+        ]
+    ; Blocks = 
+        [
+            [0..w/3] |> List.map (fun x -> (x,h/2),     Block.NotPermissive) // left jut
+            [0..w/3] |> List.map (fun x -> (w-1-x,h/2), Block.NotPermissive) // right jut
+            [1..h-2] |> List.map (fun y -> (w/3+1,y),   Block.SnakeOnly) // left bouncy wall
+            [1..h-2] |> List.map (fun y -> (2*w/3-1,y), Block.SnakeOnly) // right bouncy wall
+            makePerimeter Block.NotPermissive ( 0, 0) (w-1,h-1) //level border
+        ] |> List.concat
+
+    ; Wormholes = 
+        [
+            Wormhole.makeWormhole (Complement,Normal) (1,5) (w-1-1,h-5) Noop
+        ]
     }

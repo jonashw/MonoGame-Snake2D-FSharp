@@ -20,7 +20,7 @@ type Game1 (level: Level) as x =
     let mutable bouncyBlocks = level.BouncyBlocks
     let blocks = level.Blocks
     let staticObstacleIn: Tile.Tile -> bool = 
-        let obstacleTiles = blocks |> Set.ofList
+        let obstacleTiles = blocks |> List.map fst |> Set.ofList
         fun t -> obstacleTiles |> Set.contains t
     let wormholes = level.Wormholes
     let mutable nextHeading = None

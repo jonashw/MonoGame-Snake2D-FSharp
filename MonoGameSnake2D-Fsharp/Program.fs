@@ -17,6 +17,7 @@ let main argv =
         [ ConsoleKey.D, ("Demo",    Level.demo)
         ; ConsoleKey.W, ("Wrapper", Level.simpleWrapper)
         ; ConsoleKey.H, ("Huuuge",  Level.huuuge)
+        ; ConsoleKey.S, ("Snake-permissive tile",  Level.snakePermissiveTile)
         ] 
     let levelChoicesMap = levelChoices |> Map.ofList
     let rec startGame () =
